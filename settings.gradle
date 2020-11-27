@@ -1,0 +1,2 @@
+include ':picoimg'
+rootProject.name = "PicoImg"
