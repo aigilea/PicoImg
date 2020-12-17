@@ -240,11 +240,17 @@ public class PicoImgRequest implements Runnable
         PicoImgRequest preceedingReq = null;
         synchronized (PicoImg.sRequests)
         {
+            boolean foundSelf = false;
             for (PicoImgRequest r: PicoImg.sRequests)
-                if ((null != mInputKey) && mInputKey.equals(r.mInputKey))
+            {
+                if (r.equals(this))
+                    foundSelf = true;
+                else if ((null != mInputKey) && mInputKey.equals(r.mInputKey))
                     preceedingReq = r;
+            }
             // add ourselves
-            PicoImg.sRequests.add(this);
+            if (!foundSelf)
+                PicoImg.sRequests.add(this);
         }
         // wait for the request to reuse the result
         if (null != preceedingReq)
@@ -457,6 +463,12 @@ public class PicoImgRequest implements Runnable
         // check view target for conflicts
         if (null != mTargetView)
             PicoImg.cancel(mTargetView);
+
+        // add this request to the list of running requests
+        synchronized (PicoImg.sRequests)
+        {
+            PicoImg.sRequests.add(this);
+        }
 
         // we've got a result?
         if (null != mResult)
