@@ -124,7 +124,8 @@ public class PicoImg
         // we already have a db? try to close
         try
         {
-            PicoImg.sCacheDB.close();
+            if (null != sCacheDB)
+                sCacheDB.close();
         }
         catch (Throwable e1)
         {
