@@ -62,6 +62,7 @@ public class PicoImgRequest implements Runnable
     TargetCallback mTargetCallback;
 
     //
+    private int mRequestId;
     private String mRamKey;
     private long mCacheKey = -1;
     private int mAppId;
@@ -75,6 +76,7 @@ public class PicoImgRequest implements Runnable
         mContext = ctx;
         mInputResId = resId;
         mInputKey = "#" + resId;
+        mRequestId = PicoImg.sID.incrementAndGet();
     }
 
     PicoImgRequest(Context ctx, String asset)
@@ -82,6 +84,7 @@ public class PicoImgRequest implements Runnable
         mContext = ctx;
         mInputAsset = asset;
         mInputKey = asset;
+        mRequestId = PicoImg.sID.incrementAndGet();
     }
 
     PicoImgRequest(Context ctx, String url, String key)
@@ -89,6 +92,7 @@ public class PicoImgRequest implements Runnable
         mContext = ctx;
         mInputUrl = url;
         mInputKey = TextUtils.isEmpty(key) ? url : key;
+        mRequestId = PicoImg.sID.incrementAndGet();
     }
 
     public PicoImgRequest to(ImageView v)
@@ -245,7 +249,7 @@ public class PicoImgRequest implements Runnable
             {
                 if (r.equals(this))
                     foundSelf = true;
-                else if ((null != mInputKey) && mInputKey.equals(r.mInputKey))
+                else if ((null != mInputKey) && mInputKey.equals(r.mInputKey) && (mRequestId > r.mRequestId))
                     preceedingReq = r;
             }
             // add ourselves
@@ -299,7 +303,7 @@ public class PicoImgRequest implements Runnable
                     }
                     // create temporary cache key
                     if (-1 == mCacheKey)
-                        mCacheKey = -PicoImg.sID.incrementAndGet();
+                        mCacheKey = -mRequestId;
 
                     // create cache file name
                     cacheFile = new File(PicoImg.sCacheDir, String.valueOf(mCacheKey));
@@ -464,12 +468,6 @@ public class PicoImgRequest implements Runnable
         if (null != mTargetView)
             PicoImg.cancel(mTargetView);
 
-        // add this request to the list of running requests
-        synchronized (PicoImg.sRequests)
-        {
-            PicoImg.sRequests.add(this);
-        }
-
         // we've got a result?
         if (null != mResult)
         {
@@ -491,6 +489,12 @@ public class PicoImgRequest implements Runnable
                 mDrawable = PicoImg.cycleDrawable(mTargetView, mPlaceholderDrawable, mResizeWidth, mResizeHeight, mScaleType);
             else if (null != mPlaceholderDrawable)
                 mTargetView.setImageDrawable(mPlaceholderDrawable);
+        }
+
+        // add this request to the list of running requests
+        synchronized (PicoImg.sRequests)
+        {
+            PicoImg.sRequests.add(this);
         }
 
         // schedule background worker
