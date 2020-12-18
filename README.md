@@ -17,7 +17,7 @@ allprojects {
 
 Add the dependency to your app build.gradle file
 dependencies {
-        implementation 'com.github.aigilea:PicoImg:0.2'
+        implementation 'com.github.aigilea:PicoImg:0.3'
 }
 ```
 For the information on the other build environments see the [Jitpack release page][1].
@@ -114,6 +114,6 @@ License
 -------
 Three-clause BSD license, for more information see [LICENSE][3].
 
-[1]: https://jitpack.io#aigilea/PicoImg/0.2
+[1]: https://jitpack.io#aigilea/PicoImg/0.3
 [2]: https://github.com/aigilea/
 [3]: https://github.com/aigilea/PicoImg/blob/master/LICENSE
