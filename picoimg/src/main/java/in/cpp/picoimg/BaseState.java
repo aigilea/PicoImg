@@ -95,14 +95,8 @@ class BaseState extends Drawable.ConstantState
             try
             {
                 ExifInterface exif = new ExifInterface(urlCache.getAbsolutePath());
-                int rotval = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-                if (ExifInterface.ORIENTATION_ROTATE_90 == rotval)
-                    mOrientation = 1;
-                else if (ExifInterface.ORIENTATION_ROTATE_180 == rotval)
-                    mOrientation = 2;
-                else if (ExifInterface.ORIENTATION_ROTATE_270 == rotval)
-                    mOrientation = 3;
-                if ((mOrientation == 1) || (mOrientation == 3))
+                mOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                if ((mOrientation >= 5) && (mOrientation <= 8))
                 {
                     int temp = mHeight;
                     mHeight = mWidth;

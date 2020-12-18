@@ -145,21 +145,27 @@ public class PicoDrawable extends Drawable implements Runnable
             mShiftY = (b + t - height) / 2;
 
         // write matrix
-        if ((mScale != 1) || (mConstantState.mOrientation != 0))
+        if ((mScale != 1) || (mConstantState.mOrientation > 1))
         {
+            // op #3, scale to size
             mMatrix.setScale(mScale, mScale);
-            if (1 == mConstantState.mOrientation)
-            {
-                mMatrix.preRotate(90);
-                mShiftX += width;
-            }
-            else if (2 == mConstantState.mOrientation)
-                mMatrix.preRotate(180, mConstantState.mWidth / 2, mConstantState.mHeight / 2);
-            else if (3 == mConstantState.mOrientation)
+            // op #2, mirror horizontally
+            if((2 == mConstantState.mOrientation) || (4 == mConstantState.mOrientation) || (5 == mConstantState.mOrientation) || (7 == mConstantState.mOrientation))
+                mMatrix.preScale(-1, 1, (5 == mConstantState.mOrientation) ? -(mConstantState.mWidth / 2f) : (mConstantState.mWidth / 2f), mConstantState.mHeight / 2f);
+            // op #1, rotate
+            if (mConstantState.mOrientation >= 7)
             {
                 mMatrix.preRotate(270);
                 mShiftY += height;
             }
+            else if (mConstantState.mOrientation >= 5)
+            {
+                mMatrix.preRotate(90);
+                mShiftX += width;
+            }
+            else if (mConstantState.mOrientation >= 3)
+                mMatrix.preRotate(180, mConstantState.mWidth / 2f, mConstantState.mHeight / 2f);
+            // op #4, move into view
             mMatrix.postTranslate(mShiftX, mShiftY);
         }
     }
@@ -192,7 +198,7 @@ public class PicoDrawable extends Drawable implements Runnable
 
             if ((mScaleType & PicoImg.SCALE_S_MASK) == PicoImg.SCALE_FILL)
                 canvas.drawBitmap(mConstantState.mOutput, null, getBounds(), mPaint);
-            else if ((mScale == 1) && (0 == mConstantState.mOrientation))
+            else if ((mScale == 1) && (mConstantState.mOrientation <= 1))
                 canvas.drawBitmap(mConstantState.mOutput, mShiftX, mShiftY, mPaint);
             else
                 canvas.drawBitmap(mConstantState.mOutput, mMatrix, mPaint);
