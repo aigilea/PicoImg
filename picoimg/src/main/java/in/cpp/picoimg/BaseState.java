@@ -120,7 +120,7 @@ class BaseState extends Drawable.ConstantState
                     int len = readExifInt(activeStream, 2, false);
                     if (marker != 0xFFE1)
                     {
-                        if ((len - 2) != inp.skip(len - 2))
+                        if ((len - 2) != activeStream.skip(len - 2))
                             break;
                         continue;
                     }
