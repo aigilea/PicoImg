@@ -17,7 +17,7 @@ allprojects {
 
 Add the dependency to your app build.gradle file
 dependencies {
-        implementation 'com.github.aigilea:PicoImg:0.3.1'
+        implementation 'com.github.aigilea:PicoImg:0.3.2'
 }
 ```
 For the information on the other build environments see the [Jitpack release page][1].
@@ -34,7 +34,7 @@ PicoImg.init(context, cachePath, cacheLimitBytes);
 cachePath and cacheLimitBytes are optional, you may pass null to use the default cache location and 0 to disable size limit.
 
 You can call the init function from any place you like, just make sure you call it before any other function.
-The good choice for a single activity app is Acivity.onCreate, in case of a multi activity app consider using Application.attachBaseContext.
+The good choice for a single activity app is Activity.onCreate, in case of a multi activity app consider using Application.attachBaseContext.
 If you are going to call it from some other place try to call it only once as each subsequent call will flush the RAM cache resulting in a slight performance penalty.
 
 
@@ -114,6 +114,6 @@ License
 -------
 Three-clause BSD license, for more information see [LICENSE][3].
 
-[1]: https://jitpack.io#aigilea/PicoImg/0.3.1
+[1]: https://jitpack.io#aigilea/PicoImg/0.3.2
 [2]: https://github.com/aigilea/
 [3]: https://github.com/aigilea/PicoImg/blob/master/LICENSE
