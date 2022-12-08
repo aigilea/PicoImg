@@ -474,6 +474,8 @@ public class PicoImgRequest implements Runnable
             // should we skip the fade?
             if (!mFadeAlways)
                 mFadeSteps = 1;
+            // skip to the final iteration
+            mDone = true;
             if (mainThread)
                 run();
             else
