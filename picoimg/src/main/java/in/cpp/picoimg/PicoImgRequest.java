@@ -61,6 +61,11 @@ public class PicoImgRequest implements Runnable
     ImageView mTargetView;
     TargetCallback mTargetCallback;
 
+    // same-input request chain
+    private boolean mLinkingPassDone;
+    private boolean mLinked;
+    private PicoImgRequest mLinkNext;
+
     //
     private int mRequestId;
     private String mRamKey;
@@ -240,33 +245,36 @@ public class PicoImgRequest implements Runnable
         if ((null != mInputKey) && (mRamKey == null))
             generateRamKey();
 
-        // find other request loading the same drawable
-        PicoImgRequest preceedingReq = null;
-        synchronized (PicoImg.sRequests)
+        // try to link to other request with the same input & ensure we're on the request list
+        if (!mLinkingPassDone)
         {
-            boolean foundSelf = false;
-            for (PicoImgRequest r: PicoImg.sRequests)
+            synchronized (PicoImg.sRequests)
             {
-                if (r.equals(this))
-                    foundSelf = true;
-                else if ((null != mInputKey) && mInputKey.equals(r.mInputKey) && (mRequestId > r.mRequestId))
-                    preceedingReq = r;
-            }
-            // add ourselves
-            if (!foundSelf)
-                PicoImg.sRequests.add(this);
-        }
-        // wait for the request to reuse the result
-        if (null != preceedingReq)
-        {
-            synchronized (preceedingReq)
-            {
-                while(!preceedingReq.mDone)
+                boolean foundSelf = false;
+                for (PicoImgRequest r: PicoImg.sRequests)
                 {
-                    try { preceedingReq.wait(); break; }
-                    catch (InterruptedException e) {}
+                    if (r.equals(this))
+                        foundSelf = true;
+                    else if (!mLinked && (null != mInputKey) && mInputKey.equals(r.mInputKey) && r.mLinkingPassDone && (null == r.mLinkNext))
+                    {
+                        synchronized (r)
+                        {
+                            if (!r.mDone)
+                            {
+                                r.mLinkNext = this;
+                                mLinked = true;
+                            }
+                        }
+                    }
                 }
+                mLinkingPassDone = true;
+                // add ourselves
+                if (!foundSelf)
+                    PicoImg.sRequests.add(this);
             }
+            // don't proceed now if we are now linked to another request
+            if (mLinked)
+                return;
         }
 
         // check the ram cache
@@ -442,7 +450,6 @@ public class PicoImgRequest implements Runnable
         synchronized (this)
         {
             mDone = true;
-            this.notifyAll();
         }
 
         // restart on the main thread to publish the result
@@ -450,6 +457,10 @@ public class PicoImgRequest implements Runnable
             run();
         else
             PicoImg.sHandler.post(this);
+
+        // restart next linked request
+        if (null != mLinkNext)
+            mLinkNext.run();
     }
 
     public void runAsync()
