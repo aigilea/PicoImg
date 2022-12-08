@@ -44,10 +44,10 @@ public class PicoImgRequest implements Runnable
 
     // setup
     private boolean mDisableAnimation;
-    private boolean mSkipRamLookup;
-    private boolean mSkipRamStore;
-    private boolean mSkipDiskLookup;
-    private boolean mSkipDiskStore;
+    private boolean mCacheRamLookup = true;
+    private boolean mCacheRamStore = true;
+    private boolean mCacheDiskLookup = true;
+    private boolean mCacheDiskStore = true;
     private boolean mCachedOnly;
     private Drawable mPlaceholderDrawable;
     private int mFadeSteps = 1;
@@ -186,10 +186,10 @@ public class PicoImgRequest implements Runnable
 
     public PicoImgRequest skipCache(boolean skipRamLookup, boolean skipRamStore, boolean skipDiskLookup, boolean skipDiskStore)
     {
-        mSkipRamLookup = skipRamLookup;
-        mSkipRamStore = skipRamStore;
-        mSkipDiskLookup = skipDiskLookup;
-        mSkipDiskStore = skipDiskStore;
+        mCacheRamLookup = !skipRamLookup;
+        mCacheRamStore = !skipRamStore;
+        mCacheDiskLookup = !skipDiskLookup;
+        mCacheDiskStore = !skipDiskStore;
         return this;
     }
 
@@ -273,7 +273,7 @@ public class PicoImgRequest implements Runnable
         }
 
         // check the ram cache
-        if (!mSkipRamLookup && (null != mRamKey))
+        if (mCacheRamLookup && (null != mRamKey))
             checkRamCache();
 
         // ram cache missed? do the job
@@ -292,16 +292,21 @@ public class PicoImgRequest implements Runnable
                 else if (!TextUtils.isEmpty(mInputUrl))
                 {
                     int hash = mInputKey.hashCode();
-                    boolean download = true;
+                    boolean useCached = false;
 
-                    // try to find existing file in cache
-                    Cursor result = PicoImg.sCacheDB.query("cache", new String[]{"id", "size"}, "hash=? AND name=?", new String[]{String.valueOf(hash), mInputKey}, null, null, null);
-                    if (result.moveToFirst())
+                    // check if cache entry exists for this url
+                    // this check is still needed if mCacheDiskLookup==false but mCacheDiskStore==true to prevent creating multiple cache entries for the same url
+                    if (mCacheDiskLookup || mCacheDiskStore)
                     {
-                        cacheKey = result.getLong(0);
-                        download = mSkipDiskLookup || (result.getInt(1) == 0);
+                        Cursor result = PicoImg.sCacheDB.query("cache", new String[]{"id", "size"}, "hash=? AND name=?", new String[]{String.valueOf(hash), mInputKey}, null, null, null);
+                        if (result.moveToFirst())
+                        {
+                            cacheKey = result.getLong(0);
+                            useCached = mCacheDiskLookup && (result.getInt(1) != 0);
+                        }
+                        result.close();
                     }
-                    result.close();
+
                     // create temporary cache key
                     if (-1 == cacheKey)
                         cacheKey = -PicoImg.sID.incrementAndGet();
@@ -310,11 +315,18 @@ public class PicoImgRequest implements Runnable
                     cacheFile = new File(PicoImg.sCacheDir, String.valueOf(cacheKey));
                     if (!PicoImg.sCacheDir.exists() && !PicoImg.sCacheDir.mkdirs())
                         throw new IOException("Unable to create cache directory: " + PicoImg.sCacheDir.getAbsolutePath());
-                    if (!download && !cacheFile.exists())
-                        download = true;
+                    if (useCached && !cacheFile.exists())
+                        useCached = false;
 
-                    // need to download the file?
-                    if (download && !mCachedOnly)
+                    // update the timestamp
+                    if (useCached)
+                    {
+                        ContentValues cv = new ContentValues();
+                        cv.put("used", (int)(System.currentTimeMillis() / 1000));
+                        PicoImg.sCacheDB.update("cache", cv, "id=" + cacheKey, null);
+                    }
+                    // download the file
+                    else if (!mCachedOnly)
                     {
                         URL url = new URL(mInputUrl);
                         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -345,7 +357,7 @@ public class PicoImgRequest implements Runnable
                             if ((size > 0) && (size != total))
                                 throw new IOException("Server promised " + size + " bytes and sent " + total);
                             // update disk cache
-                            if (!mSkipDiskStore)
+                            if (mCacheDiskStore)
                             {
                                 try
                                 {
@@ -418,7 +430,7 @@ public class PicoImgRequest implements Runnable
                     mResult = new BaseState(inp, mResizeWidth, mResizeHeight, mContext, mInputResId, mInputAsset, cacheFile);
 
                 // cache to ram
-                if (!mSkipRamStore && (null != mRamKey))
+                if (mCacheRamStore && (null != mRamKey))
                     PicoImg.sRamCache.put(mRamKey, new SoftReference<>(mResult));
             }
             catch (Throwable e)
@@ -465,7 +477,7 @@ public class PicoImgRequest implements Runnable
             generateRamKey();
 
         // check the ram cache
-        if (!mSkipRamLookup && (null != mRamKey))
+        if (mCacheRamLookup && (null != mRamKey))
             checkRamCache();
 
         // check view target for conflicts
