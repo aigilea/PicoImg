@@ -317,14 +317,9 @@ public class PicoImg
         return new PicoImgRequest(ctx, name);
     }
 
-    public static PicoImgRequest loadUrl(Context ctx, String url, String key)
-    {
-        return new PicoImgRequest(ctx, url, key);
-    }
-
     public static PicoImgRequest loadUrl(Context ctx, String url)
     {
-        return new PicoImgRequest(ctx, url, null);
+        return new PicoImgRequest(ctx, url, false);
     }
 
     public long getVersionCode()

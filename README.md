@@ -65,7 +65,7 @@ public static PicoImgRequest loadResource(Context ctx, int resId), creates a req
 public static PicoImgRequest loadAsset(Context ctx, String name), same with asset.
 public static PicoImgRequest loadUrl(Context ctx, String url), same with URL.
 public static PicoImgRequest loadUrl(Context ctx, String url, String key), same with URL and explicit cache key.
-public static void cancel(ImageView v), if there's a pending request with the specified view as a target, cancel it.
+public static void cancel(ImageView v), cancels any pending request that targets the specified view.
 
 Scaling flags:
 SCALE_TOP    Aligns source image to top, bottom or center (if not specified) in the resized image.
@@ -80,20 +80,21 @@ SCALE_FILL   Resizes the source image not preserving the aspect ratio.
 in.cpp.picoimg.PicoImgRequest
 ```
 Target functions (at least one should be called):
-public PicoImgRequest to(ImageView v), specify ImageView to set the loaded drawable to.
-public PicoImgRequest callback(TargetCallback c), specify the request event callback.
+public PicoImgRequest to(ImageView v), specifies ImageView to load drawable to.
+public PicoImgRequest callback(TargetCallback c), specifies the request event callback.
 
 Configuration functions (optional):
-public PicoImgRequest placeholder(int resId), specify the image to set to the ImageView while request is running.
+public PicoImgRequest placeholder(int resId), specifies the image to set to the ImageView while request is running.
 public PicoImgRequest placeholder(Drawable drawable)
-public PicoImgRequest fade(int steps, int durationMillis, boolean always), specify fade animation when image is loaded and if the animation should run in case of cache hit and immediate request completion.
-public PicoImgRequest size(int width, int height), resize image to the given size.
-public PicoImgRequest sizeToView(), resize image to the target ImageView size. This trick makes scrolling smoother by preventing extra measure/layout pass when the image is loaded.
-public PicoImgRequest sizeToScreen(), limits image size to the screen size. This may be useful if the target size is unknown, but you want to save some memory on the huge image.
-public PicoImgRequest scale(int scale), scaling mode for size* functions, one of the PicoImg.SCALE_* flags.
-public PicoImgRequest disableAnimation(boolean disable), always load static image.
+public PicoImgRequest fade(int steps, int durationMillis, boolean always), specifies fade animation when image is loaded and if the animation should run in case of cache hit and immediate request completion.
+public PicoImgRequest size(int width, int height), resizes image to the given size.
+public PicoImgRequest sizeToView(), resizes image to the target ImageView size. This trick makes scrolling smoother by preventing extra measure/layout pass when the image is loaded.
+public PicoImgRequest sizeToScreen(), limits image size to the screen size. This may be useful if the target size is unknown but you want to save some memory on the huge image.
+public PicoImgRequest scale(int scale), sets scaling mode for size* functions, should be one of the PicoImg.SCALE_* flags.
+public PicoImgRequest disableAnimation(boolean disable), forces to always load a static image.
+public PicoImgRequest cacheKey(String key), sets cache key explicitly
 public PicoImgRequest skipCache(boolean skipRamLookup, boolean skipRamStore, boolean skipDiskLookup, boolean skipDiskStore)
-public PicoImgRequest cachedOnly(boolean cachedOnly)
+public PicoImgRequest cachedOnly(boolean cachedOnly), forbids any network activity
 
 Launch functions:
 public void runAsync(), performs the request in the background. 

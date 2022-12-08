@@ -88,11 +88,11 @@ public class PicoImgRequest implements Runnable
         mInputKey = asset;
     }
 
-    PicoImgRequest(Context ctx, String url, String key)
+    PicoImgRequest(Context ctx, String url, boolean _unused)
     {
         mContext = ctx;
         mInputUrl = url;
-        mInputKey = TextUtils.isEmpty(key) ? url : key;
+        mInputKey = url;
     }
 
     public PicoImgRequest to(ImageView v)
@@ -181,6 +181,12 @@ public class PicoImgRequest implements Runnable
     public PicoImgRequest disableAnimation(boolean disable)
     {
         mDisableAnimation = disable;
+        return this;
+    }
+
+    public PicoImgRequest cacheKey(String key)
+    {
+        mInputKey = key;
         return this;
     }
 
