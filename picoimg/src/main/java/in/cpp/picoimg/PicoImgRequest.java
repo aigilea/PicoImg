@@ -68,7 +68,6 @@ public class PicoImgRequest implements Runnable
 
     //
     private String mRamKey;
-    private long mCacheKey = -1;
     private int mAppId;
     private Object mAppObj;
     BaseState mResult;
@@ -280,6 +279,7 @@ public class PicoImgRequest implements Runnable
         // ram cache missed? do the job
         if (null == mResult)
         {
+            long cacheKey = -1;
             InputStream inp = null;
             File cacheFile = null;
 
@@ -295,22 +295,19 @@ public class PicoImgRequest implements Runnable
                     boolean download = true;
 
                     // try to find existing file in cache
-                    if (-1 == mCacheKey)
+                    Cursor result = PicoImg.sCacheDB.query("cache", new String[]{"id", "size"}, "hash=? AND name=?", new String[]{String.valueOf(hash), mInputKey}, null, null, null);
+                    if (result.moveToFirst())
                     {
-                        Cursor result = PicoImg.sCacheDB.query("cache", new String[]{"id", "size"}, "hash=? AND name=?", new String[]{String.valueOf(hash), mInputKey}, null, null, null);
-                        if (result.moveToFirst())
-                        {
-                            mCacheKey = result.getLong(0);
-                            download = mSkipDiskLookup || (result.getInt(1) == 0);
-                        }
-                        result.close();
+                        cacheKey = result.getLong(0);
+                        download = mSkipDiskLookup || (result.getInt(1) == 0);
                     }
+                    result.close();
                     // create temporary cache key
-                    if (-1 == mCacheKey)
-                        mCacheKey = -PicoImg.sID.incrementAndGet();
+                    if (-1 == cacheKey)
+                        cacheKey = -PicoImg.sID.incrementAndGet();
 
                     // create cache file name
-                    cacheFile = new File(PicoImg.sCacheDir, String.valueOf(mCacheKey));
+                    cacheFile = new File(PicoImg.sCacheDir, String.valueOf(cacheKey));
                     if (!PicoImg.sCacheDir.exists() && !PicoImg.sCacheDir.mkdirs())
                         throw new IOException("Unable to create cache directory: " + PicoImg.sCacheDir.getAbsolutePath());
                     if (!download && !cacheFile.exists())
@@ -355,7 +352,7 @@ public class PicoImgRequest implements Runnable
                                     ContentValues cv = new ContentValues();
                                     cv.put("used", (int)(System.currentTimeMillis() / 1000));
                                     // insert new cache entry
-                                    if (mCacheKey < 0)
+                                    if (cacheKey < 0)
                                     {
                                         cv.put("name", mInputKey);
                                         cv.put("hash", hash);
@@ -366,7 +363,7 @@ public class PicoImgRequest implements Runnable
                                             File newFile = new File(PicoImg.sCacheDir, String.valueOf(newKey));
                                             if (cacheFile.renameTo(newFile))
                                             {
-                                                mCacheKey = newKey;
+                                                cacheKey = newKey;
                                                 cacheFile = newFile;
                                             }
                                         }
@@ -382,7 +379,7 @@ public class PicoImgRequest implements Runnable
                                     }
                                     // update existing cache entry
                                     else
-                                        PicoImg.sCacheDB.update("cache", cv, "id=" + mCacheKey, null);
+                                        PicoImg.sCacheDB.update("cache", cv, "id=" + cacheKey, null);
                                 }
                                 catch (Throwable e)
                                 {
@@ -438,7 +435,7 @@ public class PicoImgRequest implements Runnable
                 try { inp.close(); }
                 catch (Throwable e) { e.printStackTrace(); }
             }
-            if ((mCacheKey < 0) && (null != cacheFile))
+            if ((cacheKey < 0) && (null != cacheFile))
                 cacheFile.delete();
         }
 
