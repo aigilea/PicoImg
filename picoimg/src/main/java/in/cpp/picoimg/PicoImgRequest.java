@@ -67,7 +67,6 @@ public class PicoImgRequest implements Runnable
     private PicoImgRequest mLinkNext;
 
     //
-    private int mRequestId;
     private String mRamKey;
     private long mCacheKey = -1;
     private int mAppId;
@@ -81,7 +80,6 @@ public class PicoImgRequest implements Runnable
         mContext = ctx;
         mInputResId = resId;
         mInputKey = "#" + resId;
-        mRequestId = PicoImg.sID.incrementAndGet();
     }
 
     PicoImgRequest(Context ctx, String asset)
@@ -89,7 +87,6 @@ public class PicoImgRequest implements Runnable
         mContext = ctx;
         mInputAsset = asset;
         mInputKey = asset;
-        mRequestId = PicoImg.sID.incrementAndGet();
     }
 
     PicoImgRequest(Context ctx, String url, String key)
@@ -97,7 +94,6 @@ public class PicoImgRequest implements Runnable
         mContext = ctx;
         mInputUrl = url;
         mInputKey = TextUtils.isEmpty(key) ? url : key;
-        mRequestId = PicoImg.sID.incrementAndGet();
     }
 
     public PicoImgRequest to(ImageView v)
@@ -311,7 +307,7 @@ public class PicoImgRequest implements Runnable
                     }
                     // create temporary cache key
                     if (-1 == mCacheKey)
-                        mCacheKey = -mRequestId;
+                        mCacheKey = -PicoImg.sID.incrementAndGet();
 
                     // create cache file name
                     cacheFile = new File(PicoImg.sCacheDir, String.valueOf(mCacheKey));
