@@ -321,14 +321,4 @@ public class PicoImg
     {
         return new PicoImgRequest(ctx, url, false);
     }
-
-    public long getVersionCode()
-    {
-        return BuildConfig.VERSION_CODE;
-    }
-
-    public String getVersionString()
-    {
-        return BuildConfig.VERSION_NAME;
-    }
 }
