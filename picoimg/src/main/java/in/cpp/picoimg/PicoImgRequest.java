@@ -525,6 +525,11 @@ public class PicoImgRequest implements Runnable
         PicoImg.sExecutor.execute(this);
     }
 
+    public void cancel()
+    {
+        this.mCancelled = true;
+    }
+
     public PicoImgRequest setAppId(int appId)
     {
         mAppId = appId;

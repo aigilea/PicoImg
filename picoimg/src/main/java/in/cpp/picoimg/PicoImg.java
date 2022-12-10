@@ -184,8 +184,8 @@ public class PicoImg
         synchronized (sRequests)
         {
             for (PicoImgRequest r: PicoImg.sRequests)
-                if (!r.mCancelled && v.equals(r.mTargetView))
-                    r.mCancelled = true;
+                if (v.equals(r.mTargetView))
+                    r.cancel();
         }
     }
 
