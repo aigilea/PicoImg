@@ -204,7 +204,7 @@ class GIFState extends BaseState
                         buf[pos++] = (byte) f.mTransp;
                         buf[pos++] = 0; // end
                     }
-                    buf[pos++] = (byte) INT_IMAGE;
+                    buf[pos++] = INT_IMAGE;
                     pos = write_ushort_le(buf, pos, 0); // x
                     pos = write_ushort_le(buf, pos, 0); // y
                     pos = write_ushort_le(buf, pos, f.mWidth);
@@ -409,7 +409,7 @@ class GIFState extends BaseState
 
     //region RENDERER
     private boolean mPreloadRunning;
-    private Runnable mPreloadRunnable = new Runnable()
+    private final Runnable mPreloadRunnable = new Runnable()
     {
         @Override public void run()
         {

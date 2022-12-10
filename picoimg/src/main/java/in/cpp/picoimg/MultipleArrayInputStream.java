@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 class MultipleArrayInputStream extends InputStream
 {
-    private byte[][] mBufs;
+    private final byte[][] mBufs;
     private int mCurrentBuf;
     private int mCurrentPos;
     private int mCurrentAvail;

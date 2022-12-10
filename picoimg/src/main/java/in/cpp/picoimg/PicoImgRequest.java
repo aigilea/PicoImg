@@ -32,9 +32,9 @@ public class PicoImgRequest implements Runnable
 
     public static class CancelledException extends IOException {}
 
-    Context mContext;
-    boolean mDone;
-    boolean mCancelled;
+    private final Context mContext;
+    private volatile boolean mDone;
+    private volatile boolean mCancelled;
 
     // source
     private int mInputResId;
@@ -62,9 +62,9 @@ public class PicoImgRequest implements Runnable
     TargetCallback mTargetCallback;
 
     // same-input request chain
-    private boolean mLinkingPassDone;
-    private boolean mLinked;
-    private PicoImgRequest mLinkNext;
+    private volatile boolean mLinkingPassDone;
+    private volatile boolean mLinked;
+    private volatile PicoImgRequest mLinkNext;
 
     //
     private String mRamKey;

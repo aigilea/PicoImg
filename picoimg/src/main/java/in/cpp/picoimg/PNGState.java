@@ -346,7 +346,7 @@ class PNGState extends BaseState
 
     //region RENDERER
     private boolean mPreloadRunning;
-    private Runnable mPreloadRunnable = new Runnable()
+    private final Runnable mPreloadRunnable = new Runnable()
     {
         @Override public void run()
         {

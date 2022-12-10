@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -91,7 +90,7 @@ public class PicoImg
         sCacheExt = false;
         if (TextUtils.isEmpty(sCachePath))
         {
-            if (!intOnly && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO))
+            if (!intOnly)
             {
                 try { sCacheDir = ctx.getExternalCacheDir(); }
                 catch (Exception e) { e.printStackTrace(); }
