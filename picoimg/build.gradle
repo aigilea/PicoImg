@@ -8,16 +8,16 @@ android {
     defaultConfig {
         minSdkVersion 8
         targetSdkVersion 31
-        versionCode 32
-        versionName "0.3.2"
+        versionCode 33
+        versionName "0.3.3"
+        buildConfigField("long", "VERSION_CODE", "${defaultConfig.versionCode}")
+        buildConfigField("String","VERSION_NAME","\"${defaultConfig.versionName}\"")
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField("long", "VERSION_CODE", "${defaultConfig.versionCode}")
-            buildConfigField("String","VERSION_NAME","\"${defaultConfig.versionName}\"")
         }
     }
 }
